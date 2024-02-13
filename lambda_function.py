@@ -4,6 +4,7 @@ import boto3
 import requests
 import os
 import datetime
+import ast
 
 bot_token = os.environ['BOT_TOKEN']
 group_chat_id = os.environ['GROUP_CHAT_ID']
@@ -54,8 +55,9 @@ def summarize_messages(messages):
 
 def translate_messages(messages):
     client = boto3.client('translate', region_name='us-east-1')
+    messages_payload = ast.literal_eval(messages) if isinstance(messages, str) else messages
 
-    for message in messages:
+    for message in messages_payload:
         response = client.translate_text(
             Text=message["content"],
             SourceLanguageCode='auto',  # Automatically detect the source language
@@ -65,21 +67,11 @@ def translate_messages(messages):
         translated_message = response['TranslatedText']
         message["translated_content"] = translated_message
 
-    return messages
+    return messages_payload
 
 
 def get_current_date():
     return time.strftime("%Y-%m-%d")
-
-
-def pull_messages_test():
-    return [{"sender": "Amelia", "content": "Drodzy Rodzice, oddajmy głos na prezenty dla dzieci",
-             "timestamp": "2024-01-27 14:30:26.159446"},
-            {"sender": "Emil", "content": "głosuję na to samo co rok temu", "timestamp": "2024-01-27 14:32:26.159446"},
-            {"sender": "Margo", "content": "ja również", "timestamp": "2024-01-27 14:33:26.159446"},
-            {"sender": "Ilona", "content": "kiedy musimy przynieść pieniądze?",
-             "timestamp": "2024-01-27 14:35:26.159446"},
-            {"sender": "Emma", "content": "do 2 lutego", "timestamp": "2024-01-27 14:39:26.159446"}]
 
 
 def get_updates():
@@ -99,8 +91,10 @@ def pull_messages():
     if updates and 'result' in updates:
         for update in updates['result']:
             print(update)
-            if 'message' in update and 'text' in update['message']:
+            if 'message' in update and 'text' in update['message']\
+                    and 'link_preview_options' not in update['message']:
                 message_text = update['message']['text']
+                message_text = message_text.replace('\n', "")
                 sender = update['message']['from']['username']
                 date = update['message']['date']
                 date = datetime.datetime.utcfromtimestamp(date).strftime('%Y-%m-%d %H:%M:%S')
@@ -108,8 +102,8 @@ def pull_messages():
     return messages
 
 
-def translate_summarize_messages(parameters):
-    translated_messages = translate_messages(parameters)
+def translate_summarize_messages(messages):
+    translated_messages = translate_messages(messages)
     for message in translated_messages:
         del message["content"]
     print(translated_messages)
@@ -117,34 +111,52 @@ def translate_summarize_messages(parameters):
 
 
 def lambda_handler(event, context):
-    response_code = 200
-    action = event['actionGroup']
-    api_path = event['apiPath']
+    # Print the received event to the logs
+    print("Received event: ")
+    print(event)
+
+    # Initialize response code to None
+    response_code = None
+
+    # Extract the action group, api path, and parameters from the prediction
+    action = event["actionGroup"]
+    api_path = event["apiPath"]
+    parameters = event.get("parameters", None)
+    input_text = event["inputText"]
+    http_method = event["httpMethod"]
+
+    print(f"inputText: {input_text}")
 
     if api_path == '/current-date':
         body = get_current_date()
+        response_body = {"application/json": {"body": str(body)}}
+        response_code = 200
     elif api_path == '/pull-messages':
         body = pull_messages()
+        response_body = {"application/json": {"body": str(body)}}
+        response_code = 200
     elif api_path == '/translate-summarize':
-        parameters = event['parameters']
         body = translate_summarize_messages(parameters)
+        response_body = {"application/json": {"body": str(body)}}
+        response_code = 200
     else:
         body = {"{}::{} is not a valid api, try another one.".format(action, api_path)}
+        response_code = 400
+        response_body = {"application/json": {"body": str(body)}}
 
-    response_body = {
-        'application/json': {
-            'body': str(body)
-        }
-    }
+    # Print the response body to the logs
+    print(f"Response body: {response_body}")
 
+    # Create a dictionary containing the response details
     action_response = {
-        'actionGroup': event['actionGroup'],
-        'apiPath': event['apiPath'],
-        'httpMethod': event['httpMethod'],
-        'httpStatusCode': response_code,
-        'responseBody': response_body
+        "actionGroup": action,
+        "apiPath": api_path,
+        "httpMethod": http_method,
+        "httpStatusCode": response_code,
+        "responseBody": response_body,
     }
 
-    api_response = {'response': action_response}
+    # Return the list of responses as a dictionary
+    api_response = {"messageVersion": "1.0", "response": action_response}
 
     return api_response
