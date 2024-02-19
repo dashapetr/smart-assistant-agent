@@ -55,19 +55,16 @@ def summarize_messages(messages):
 
 def translate_messages(messages):
     client = boto3.client('translate', region_name='us-east-1')
-    messages_payload = ast.literal_eval(messages) if isinstance(messages, str) else messages
 
-    for message in messages_payload:
-        response = client.translate_text(
-            Text=message["content"],
+    response = client.translate_text(
+            Text=messages,
             SourceLanguageCode='auto',  # Automatically detect the source language
             TargetLanguageCode='en'  # Translate to English
         )
 
-        translated_message = response['TranslatedText']
-        message["translated_content"] = translated_message
+    translated_message = response['TranslatedText']
 
-    return messages_payload
+    return translated_message
 
 
 def get_current_date():
@@ -87,7 +84,7 @@ def get_updates():
 # Main function to process updates
 def pull_messages():
     updates = get_updates()
-    messages = []
+    messages = ''
     if updates and 'result' in updates:
         for update in updates['result']:
             print(update)
@@ -98,14 +95,14 @@ def pull_messages():
                 sender = update['message']['from']['username']
                 date = update['message']['date']
                 date = datetime.datetime.utcfromtimestamp(date).strftime('%Y-%m-%d %H:%M:%S')
-                messages.append({"sender": sender, "content": message_text, "timestamp": date})
+                messages += f"{sender}: {message_text}, "
     return messages
 
 
 def translate_summarize_messages(messages):
+    if not messages:
+        return "No messages was found. Consider using other chat or try different start date."
     translated_messages = translate_messages(messages)
-    for message in translated_messages:
-        del message["content"]
     print(translated_messages)
     return summarize_messages(translated_messages)
 
@@ -136,6 +133,8 @@ def lambda_handler(event, context):
         response_body = {"application/json": {"body": str(body)}}
         response_code = 200
     elif api_path == '/translate-summarize':
+        if not parameters:
+            parameters = event['requestBody']['content']['application/json']['properties'][0]['value']
         body = translate_summarize_messages(parameters)
         response_body = {"application/json": {"body": str(body)}}
         response_code = 200
