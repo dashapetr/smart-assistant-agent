@@ -4,7 +4,13 @@ import boto3
 import requests
 import os
 import datetime
-import ast
+
+# todo: custom prompt as a question: add api endpoint
+# todo: pull all messages history
+# todo: pull from a specific chat
+# todo: filter by date
+# todo: decide to translate or not (agent) or Comprehend to detect the language
+# todo: separate summarization and translation endpoints
 
 bot_token = os.environ['BOT_TOKEN']
 group_chat_id = os.environ['GROUP_CHAT_ID']
