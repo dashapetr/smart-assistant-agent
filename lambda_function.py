@@ -3,12 +3,9 @@ import time
 import boto3
 import requests
 import os
-import datetime
 
 # todo: custom prompt as a question: add api endpoint
-# todo: pull all messages history
 # todo: pull from a specific chat
-# todo: filter by date
 # todo: decide to translate or not (agent) or Comprehend to detect the language
 # todo: separate summarization and translation endpoints
 
@@ -78,6 +75,7 @@ def get_current_date():
 
 
 def get_updates():
+    # can see 24 h only
     url = f'https://api.telegram.org/bot{bot_token}/getUpdates'
     response = requests.get(url)
     if response.status_code == 200:
@@ -88,7 +86,7 @@ def get_updates():
 
 
 # Main function to process updates
-def pull_messages():
+def pull_messages(parameters):
     updates = get_updates()
     messages = ''
     if updates and 'result' in updates:
@@ -99,8 +97,6 @@ def pull_messages():
                 message_text = update['message']['text']
                 message_text = message_text.replace('\n', "")
                 sender = update['message']['from']['username']
-                date = update['message']['date']
-                date = datetime.datetime.utcfromtimestamp(date).strftime('%Y-%m-%d %H:%M:%S')
                 messages += f"{sender}: {message_text}, "
     return messages
 
@@ -135,13 +131,19 @@ def lambda_handler(event, context):
         response_body = {"application/json": {"body": str(body)}}
         response_code = 200
     elif api_path == '/pull-messages':
-        body = pull_messages()
+        body = pull_messages(parameters)
         response_body = {"application/json": {"body": str(body)}}
         response_code = 200
-    elif api_path == '/translate-summarize':
+    elif api_path == '/translate':
         if not parameters:
             parameters = event['requestBody']['content']['application/json']['properties'][0]['value']
-        body = translate_summarize_messages(parameters)
+        body = translate_messages(parameters)
+        response_body = {"application/json": {"body": str(body)}}
+        response_code = 200
+    elif api_path == '/summarize':
+        if not parameters:
+            parameters = event['requestBody']['content']['application/json']['properties'][0]['value']
+        body = summarize_messages(parameters)
         response_body = {"application/json": {"body": str(body)}}
         response_code = 200
     else:
