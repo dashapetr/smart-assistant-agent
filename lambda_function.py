@@ -1,13 +1,10 @@
 import json
-import time
 import boto3
 import requests
 import os
 
 # todo: custom prompt as a question: add api endpoint
 # todo: pull from a specific chat
-# todo: decide to translate or not (agent) or Comprehend to detect the language
-# todo: separate summarization and translation endpoints
 
 bot_token = os.environ['BOT_TOKEN']
 group_chat_id = os.environ['GROUP_CHAT_ID']
@@ -26,15 +23,17 @@ bedrock_runtime = boto3.client(
 
 
 def summarize_messages(messages):
+    if not messages:
+        return "No messages was found. Consider using other chat."
     prompt = str(
         messages) + "\n\nGiven messages extracted from the chat, summarize the chat and extract my action points."
 
     prompt_config = {
         "inputText": prompt,
         "textGenerationConfig": {
-            "maxTokenCount": 4096,
+            "maxTokenCount": 1000,
             "stopSequences": [],
-            "temperature": 0.7,
+            "temperature": 1,
             "topP": 1,
         },
     }
@@ -56,12 +55,16 @@ def summarize_messages(messages):
     return results
 
 
-def translate_messages(messages):
+def translate_messages(parameters):
+    messages = next(item["value"] for item in parameters if item["name"] == "messages")
+    source_lang = next(item["value"] for item in parameters if item["name"] == "sourceLanguage")
+    if not messages:
+        return "No messages was found. Consider using other chat."
     client = boto3.client('translate', region_name='us-east-1')
 
     response = client.translate_text(
             Text=messages,
-            SourceLanguageCode='auto',  # Automatically detect the source language
+            SourceLanguageCode=source_lang,  # Automatically detect the source language
             TargetLanguageCode='en'  # Translate to English
         )
 
@@ -70,8 +73,15 @@ def translate_messages(messages):
     return translated_message
 
 
-def get_current_date():
-    return time.strftime("%Y-%m-%d")
+def detect_language(messages):
+    if not messages:
+        return "No messages was found. Consider using other chat."
+    comprehend = boto3.client('comprehend')
+
+    response = comprehend.detect_dominant_language(Text=messages)
+    detected_language = response['Languages'][0]['LanguageCode']
+
+    return detected_language
 
 
 def get_updates():
@@ -101,14 +111,6 @@ def pull_messages(parameters):
     return messages
 
 
-def translate_summarize_messages(messages):
-    if not messages:
-        return "No messages was found. Consider using other chat or try different start date."
-    translated_messages = translate_messages(messages)
-    print(translated_messages)
-    return summarize_messages(translated_messages)
-
-
 def lambda_handler(event, context):
     # Print the received event to the logs
     print("Received event: ")
@@ -126,17 +128,19 @@ def lambda_handler(event, context):
 
     print(f"inputText: {input_text}")
 
-    if api_path == '/current-date':
-        body = get_current_date()
+    if api_path == '/pull-messages':
+        body = pull_messages(parameters)
         response_body = {"application/json": {"body": str(body)}}
         response_code = 200
-    elif api_path == '/pull-messages':
-        body = pull_messages(parameters)
+    elif api_path == '/detect-language':
+        if not parameters:
+            parameters = event['requestBody']['content']['application/json']['properties'][0]['value']
+        body = detect_language(parameters)
         response_body = {"application/json": {"body": str(body)}}
         response_code = 200
     elif api_path == '/translate':
         if not parameters:
-            parameters = event['requestBody']['content']['application/json']['properties'][0]['value']
+            parameters = event['requestBody']['content']['application/json']['properties']
         body = translate_messages(parameters)
         response_body = {"application/json": {"body": str(body)}}
         response_code = 200
