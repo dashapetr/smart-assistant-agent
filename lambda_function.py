@@ -2,12 +2,14 @@ import json
 import boto3
 import requests
 import os
+from fuzzywuzzy import process
 
 # todo: custom prompt as a question: add api endpoint
-# todo: pull from a specific chat
 
 bot_token = os.environ['BOT_TOKEN']
-group_chat_id = os.environ['GROUP_CHAT_ID']
+default_chat_id = os.environ['GROUP_CHAT_ID']
+bot_id = os.environ['BOT_ID']
+TABLE_NAME = os.environ['DYNAMODB_TABLE_NAME']
 
 # Bedrock client used to interact with APIs around models
 bedrock = boto3.client(
@@ -84,6 +86,42 @@ def detect_language(messages):
     return detected_language
 
 
+def get_chat_id(bot_id, chat_name, default_id=default_chat_id):
+    dynamodb = boto3.client('dynamodb', region_name='us-east-1')
+    table_name = TABLE_NAME
+
+    try:
+        response = dynamodb.get_item(
+            TableName=table_name,
+            Key={
+                'agent_id': {'S': bot_id}
+            }
+        )
+
+        print(response)
+        chats = response['Item'].get('chats', {}).get('L', [])
+        print(chats)
+        chat_names = [chat.get('M', {}).get('chat_name', {}).get('S', '') for chat in chats]
+        closest_match = process.extractOne(chat_name, chat_names)
+
+        if closest_match:
+            closest_name, score = closest_match
+            if score >= 80:
+                for chat in chats:
+                    chat_details = chat.get('M', {})
+                    if chat_details.get('chat_name', {}).get('S') == closest_name:
+                        return chat_details.get('chat_id', {}).get('S')
+            print(f"No close match found for the chat name '{chat_name}'.")
+            return default_id
+        else:
+            print(f"No chats found for the bot ID '{bot_id}'.")
+            return default_id
+
+    except Exception as e:
+        print("Error:", e)
+        return default_id
+
+
 def get_updates():
     # can see 24 h only
     url = f'https://api.telegram.org/bot{bot_token}/getUpdates'
@@ -95,17 +133,19 @@ def get_updates():
         return None
 
 
-# Main function to process updates
 def pull_messages(parameters):
+    chat_name = next(item["value"] for item in parameters if item["name"] == "chatName")
+    chat_id = get_chat_id(bot_id, chat_name, default_chat_id)
     updates = get_updates()
     messages = ''
     if updates and 'result' in updates:
         for update in updates['result']:
             print(update)
             if 'message' in update and 'text' in update['message']\
-                    and 'link_preview_options' not in update['message']:
+                    and 'link_preview_options' not in update['message'] \
+                    and str(update['message']['chat']['id']) == chat_id:
                 message_text = update['message']['text']
-                message_text = message_text.replace('\n', "")
+                message_text = message_text.replace('\n', " ")
                 sender = update['message']['from']['username']
                 messages += f"{sender}: {message_text}, "
     return messages
