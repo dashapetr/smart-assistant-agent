@@ -6,20 +6,58 @@ from tools import ask_model, get_chat_id, get_updates, format_messages
 BOT_ID = os.environ['BOT_ID']
 
 
-def summarize_messages(parameters):
+def summarize_messages(parameters: list) -> str:
+    """
+    Summarizes messages extracted from a chat and extracts action points.
+
+    Args:
+        parameters (list): A list of dictionaries containing parameters
+            related to the chat. Each dictionary contains 'name' and 'value'
+            keys, where 'name' represents the parameter name and 'value'
+            represents the parameter value.
+
+    Returns:
+        str: A summary of the chat and extracted action points.
+    """
     messages = next(item["value"] for item in parameters if item["name"] == "messages")
-    instructions = "Given messages extracted from the chat, summarize the chat and extract my action points.\n"
+    instructions = "Given messages extracted from the chat, " \
+                   "summarize the chat and extract my action points.\n"
     return ask_model(messages, instructions)
 
 
-def query_chat(parameters):
+def query_chat(parameters: list) -> str:
+    """
+    Queries the chat based on the custom prompt.
+
+    Args:
+        parameters (list): A list of dictionaries containing parameters
+            related to the chat. Each dictionary contains 'name' and 'value'
+            keys, where 'name' represents the parameter name and 'value'
+            represents the parameter value.
+
+    Returns:
+        str: A chat-based answer to the custom prompt.
+    """
     messages = next(item["value"] for item in parameters if item["name"] == "messages")
     custom_prompt = next(item["value"] for item in parameters if item["name"] == "customPrompt")
-    instructions = f"Given messages extracted from the chat, answer the following question: {custom_prompt} \n"
+    instructions = f"Given messages extracted from the chat, " \
+                   f"answer the following question: {custom_prompt} \n"
     return ask_model(messages, instructions)
 
 
-def translate_messages(parameters):
+def translate_messages(parameters: list) -> str:
+    """
+    Translates messages from a specified source language to English.
+
+    Args:
+        parameters (list): A list of dictionaries containing parameters
+            related to the translation. Each dictionary contains 'name' and 'value'
+            keys, where 'name' represents the parameter name and 'value'
+            represents the parameter value.
+
+    Returns:
+        str: Translated messages in English.
+    """
     messages = next(item["value"] for item in parameters if item["name"] == "messages")
     source_lang = next(item["value"] for item in parameters if item["name"] == "sourceLanguage")
     if not messages:
@@ -37,7 +75,19 @@ def translate_messages(parameters):
     return translated_message
 
 
-def detect_language(parameters):
+def detect_language(parameters: list) -> str:
+    """
+    Detects the language of messages.
+
+    Args:
+        parameters (list): A list of dictionaries containing parameters
+            related to the chat. Each dictionary contains 'name' and 'value'
+            keys, where 'name' represents the parameter name and 'value'
+            represents the parameter value.
+
+    Returns:
+        str: Language code, for example 'pl'.
+    """
     messages = next(item["value"] for item in parameters if item["name"] == "messages")
     if not messages:
         return "No messages was found. Consider using other chat."
@@ -49,7 +99,19 @@ def detect_language(parameters):
     return detected_language
 
 
-def pull_messages(parameters):
+def pull_messages(parameters: list) -> str:
+    """
+    Gets messages updates from a specific chat.
+
+    Args:
+        parameters (list): A list of dictionaries containing parameters
+            related to the chat. Each dictionary contains 'name' and 'value'
+            keys, where 'name' represents the parameter name and 'value'
+            represents the parameter value.
+
+    Returns:
+        str: Pulled messages from a specific chat.
+    """
     chat_name = next(item["value"] for item in parameters if item["name"] == "chatName")
     chat_id = get_chat_id(BOT_ID, chat_name)
     updates = get_updates()
@@ -57,14 +119,23 @@ def pull_messages(parameters):
     return messages
 
 
-def lambda_handler(event, context):
+def lambda_handler(event: dict, context: object) -> dict:
+    """
+    Lambda function handler to process incoming API requests.
+
+    Args:
+        event (dict): The event data passed to the lambda function.
+        context (object): The runtime information of the lambda function.
+
+    Returns:
+        dict: A dictionary containing the response data to be returned
+           by the lambda function.
+
+    """
     print("Received event: ")
     print(event)
 
-    # Initialize response code to None
     response_code = None
-
-    # Extract the action group, api path, and parameters from the prediction
     action = event["actionGroup"]
     api_path = event["apiPath"]
     parameters = event.get("parameters", None)
@@ -97,10 +168,8 @@ def lambda_handler(event, context):
         response_code = 400
         response_body = {"application/json": {"body": str(body)}}
 
-    # Print the response body to the logs
     print(f"Response body: {response_body}")
 
-    # Create a dictionary containing the response details
     action_response = {
         "actionGroup": action,
         "apiPath": api_path,
@@ -109,7 +178,6 @@ def lambda_handler(event, context):
         "responseBody": response_body,
     }
 
-    # Return the list of responses as a dictionary
     api_response = {"messageVersion": "1.0", "response": action_response}
 
     return api_response
