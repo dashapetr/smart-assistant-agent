@@ -3,7 +3,7 @@
 Welcome to building Generative AI Telegram Chat Agent using Amazon Bedrock Agents. 
 
 
-![Agent Architecture Diagram](/images/agent_architecture.png)
+![Agent Architecture Diagram](/images/agent_architecture.jpg)
 
 ## What Chat Assistant Can Do
 
