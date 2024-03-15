@@ -54,8 +54,24 @@ That's it might be a good idea to create Lambda Function in the same region wher
 
 ![Create Lambda Function](/images/create_lambda.jpg)
 
-#### Update permissions:
-Note: IAM permissions
+#### Update Lambda permissions:
+1. Once the function is created, click on the Configuration Tab in the same page and Choose `Permissions` from the left side panel
+2. Click on `Add permissions` button in Resource-based policy statement section to provide the permission to invoke lambda functions from Bedrock
+3. Provide Statement Id as `agent`, Principal as `bedrock.amazonaws.com` and Action as `lambda:InvokeFunction`. Click Save after adding all the above three information.
+4. Add the following Policy Statement to your Execution role, so Lambda can call Bedrock. (Details here)
+```{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Sid": "VisualEditor0",
+            "Effect": "Allow",
+            "Action": "bedrock:InvokeModel",
+            "Resource": "*"
+        }
+    ]
+}
+```
+5. Add `AmazonDynamoDBReadOnlyAccess` and `TranslateReadOnly` policies to your Execution role, so Lambda can call DynamoDB, Comprehend and Translate.
 
 #### Add environmental variables:
 configuration, environmental variables, 
@@ -64,6 +80,8 @@ configuration, environmental variables,
 
 #### Add code:
 How to package Lambda using simple commands.
+
+https://docs.aws.amazon.com/lambda/latest/dg/python-package.html#python-package-create-dependencies
 
 #### Test your Lambda:
 
@@ -76,12 +94,13 @@ Upload openapi file to S3
 
 ### :three: Step 3: Configure Bedrock agent
 
+Now as all the preparation is done, we can proceed with Agent creation.
 Go to Bedrock and create agent. Mind the region!
 Make sure that claude model is enabled
 
 ### :four: Step 4: Test it out!
 
-Note: 24 hours window
+Note: Keep in mind that 24 hours window
 
 ## Conclusion and more ideas: 
 
