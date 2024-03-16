@@ -7,7 +7,7 @@ from typing import Union
 from fuzzywuzzy import process
 
 BOT_TOKEN = os.environ['BOT_TOKEN']
-DEFAULT_CHAT_ID = os.environ['GROUP_CHAT_ID']
+DEFAULT_CHAT_ID = os.environ['DEFAULT_CHAT_ID']
 TABLE_NAME = os.environ['DYNAMODB_TABLE_NAME']
 
 
