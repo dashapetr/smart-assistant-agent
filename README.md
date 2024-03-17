@@ -70,7 +70,9 @@ That's why it will be a good idea to create DynamoDB table and Lambda Function i
 
 1. Navigate to the [DynamoDB console](https://us-east-1.console.aws.amazon.com/dynamodbv2/home?region=us-east-1#service) and click on `Create table`.
 2. Enter `bedrock_agent_chats` as `Table name` and `bot_id` as `Partition key`. Click on the `Create table` button.
+
 ![DynamoDB create table](images/dynamodb-create-table.jpg)
+
 3. Once the table is created, let's populate it with values. Click on the created table, then click on the `Actions` button and select `Create item` from the drop-down list.
 4. Paste `100200300` as `bot_id` (or another Id value, but make sure to use the same bot Id in Lambda function environment variables later on)
 5. Click on the `Add new attribute` button and select `List`. Paste `chats` as Attribute name
@@ -78,6 +80,7 @@ That's why it will be a good idea to create DynamoDB table and Lambda Function i
 7. Click on the lowest `Insert a field` button and choose `String`. Paste `chat_id` as Attribute name and your Telegram chat id (typically starting from '-') as value. [How to get telegram chat id](https://medium.com/@2mau/how-to-get-a-chat-id-in-telegram-1861a33ca1de).
 8. Click on the lowest `Insert a field` button and choose `String`. Paste `chat_name` as Attribute name and your Telegram chat name as value.
 9. Repeat steps 6-8 to add more chats, once ready, click on the `Create item` button.
+
 ![Add item](images/dynamodb-add-item.jpg)
 
 ### :two: Step 2: Create Lambda Function
@@ -185,7 +188,9 @@ Since our Lambda contains a set of APIs, you may want to create several test eve
 3. Paste the code from `test-payload-lambda/summarize.json` in `Even JSON` window. 
 This will be a test event for the `summarize` API that matches how the Agent will send a request.
 4. Click on `Save` and then `Test` to execute the Lambda function. You should see the results of the function invocation, which will be a summarization response from the Titan Model.
+
 ![Lambda test results](images/lambda-test-result.jpg)
+
 5. Click on `Create new event` button and repeat steps 2-4 to add more test events (you can find JSON payloads in the `test-payload-lambda` folder) 
 
 ### :three: Step 3: Add OpenAPI spec file to S3
@@ -197,7 +202,9 @@ Bedrock agent will be able to understand what tool to use based on the user requ
 1. Go to [S3 console](https://s3.console.aws.amazon.com/s3/get-started?region=us-east-1&bucketType=general) and click on the `Create bucket` button
 2. Make sure that `US East (N. Virginia)` or `US West (Oregon)` is selected as region (select the same where your DynamoDB and Lambda reside). 
 3. Give your bucket a unique name, for example `bucket-for-agent-NUMBERS`. Click `Create bucket`.
+
 ![Create bucket](images/create-bucket.jpg)
+
 4. Select your created bucket, click on the `Upload` button.
 5. You can drag and drop `openapi-schema.json` file and then click on the `Upload` button
 
@@ -216,12 +223,15 @@ If you are asked to summarize messages, summarize messages.
 If you are asked a specific question, query the chat messages based on the provided prompt.
 ```
 4. Next, we will add Action group. Use `ChatReadingSummarizingActionGroup` as Action group name, select `ChatSummarizer` as Lambda function. Finally, browse S3 and select the `openapi-schema.json` file. Click `Next`.
+
 ![Add action group](images/agent-add-action-group.jpg)
+
 5. Skip adding knowledge base and click on the `Create agent` button.
 
 ### :five: Step 5: Test it out!
 
 Once the agent is created, feel free to test it! Ask questions and observe results.
+
 Additionally, you can evaluate the chained process of agents reasoning by looking at **Trace** for your request.
 It contains reasoning steps for **Pre-Processing trace**, **Orchestration and Knowledge Base**, and **Post-Processing trace**
 
