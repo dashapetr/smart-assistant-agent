@@ -1,0 +1,237 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Chat Summarizing Automation API",
+    "version": "1.0.0",
+    "description": "APIs for chat assistance: getting messages from indicated Telegram chat, translating to English (if needed), and summarizing them. Includes the possibility to query the chat with a custom question."
+  },
+  "paths": {
+    "/pull-messages": {
+      "get": {
+        "summary": "Pull messages from the indicated chat",
+        "description": "Pull messages from the chat based on the provided chat name.",
+        "operationId": "pullMessages",
+        "parameters": [
+          {
+            "name": "chatName",
+            "in": "query",
+            "description": "Name of the chat",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Pulled messages",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string",
+                  "description": "Text of the pulled messages"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/detect-language": {
+      "post": {
+        "summary": "Detect the language of the text",
+        "description": "Detect the language of the given block of messages. The API takes in text of messages and returns their language code.",
+        "operationId": "detectLanguage",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "messages": {
+                    "type": "string",
+                    "description": "Messages text the language of which will be detected"
+                  }
+                },
+                "required": [
+                  "messages"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Language detection successful",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "summary": {
+                      "type": "string",
+                      "description": "Language code of the detected language"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request. One or more required fields are missing or invalid."
+          }
+        }
+      }
+    },
+    "/translate": {
+      "post": {
+        "summary": "Translate Messages",
+        "description": "Translate a given block of messages. The API takes in messages written in a language other than English and the source language code. It translates messages into English.",
+        "operationId": "translateMessages",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "messages": {
+                    "type": "string",
+                    "description": "Text of the messages to be translated"
+                  },
+                  "sourceLanguage": {
+                    "type": "string",
+                    "description": "Source language code"
+                  }
+                },
+                "required": [
+                  "messages", "sourceLanguage"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Translation successful",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "summary": {
+                      "type": "string",
+                      "description": "Summary text of the messages"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request. One or more required fields are missing or invalid."
+          }
+        }
+      }
+    },
+    "/summarize": {
+      "post": {
+        "summary": "Summarize Messages",
+        "description": "Summarize a given block of messages. The API takes in text of messages written in English,  and provides a summarization output and/or action points.",
+        "operationId": "summarizeMessages",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "messages": {
+                    "type": "string",
+                    "description": "Text of the messages to be summarized"
+                  }
+                },
+                "required": [
+                  "messages"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Summarization successful",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "summary": {
+                      "type": "string",
+                      "description": "Summary text of the messages"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request. One or more required fields are missing or invalid."
+          }
+        }
+      }
+    },
+    "/query-chat": {
+      "post": {
+        "summary": "Query the chat",
+        "description": "Query the chat based on a custom prompt question. The API takes in text of messages written in English, and the custom prompt (question). It provides an answer based on the chat context.",
+        "operationId": "summarizeMessages",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "messages": {
+                    "type": "string",
+                    "description": "Text of the messages for the context"
+                  },
+                  "customPrompt": {
+                    "type": "string",
+                    "description": "Custom question"
+                  }
+                },
+                "required": [
+                  "messages", "customPrompt"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Chat querying successful",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "summary": {
+                      "type": "string",
+                      "description": "A chat-based answer to the custom prompt"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request. One or more required fields are missing or invalid."
+          }
+        }
+      }
+    }
+  }
+}

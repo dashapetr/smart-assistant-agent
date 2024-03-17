@@ -166,9 +166,18 @@ This will be a test event for the `summarize` API that matches how the Agent wil
 ![Lambda test results](images/lambda-test-result.jpg)
 5. Click on `Create new event` button and repeat steps 2-4 to add more test events (you can find JSON payloads in the `test-payload-lambda` folder) 
 
-### :three: Step 3: Add openapi file to S3
+### :three: Step 3: Add OpenAPI spec file to S3
 
-Upload openapi file to S3
+The [OpenAPI Specification (OAS)](https://swagger.io/specification/) defines a standard, language-agnostic interface to HTTP APIs which allows both humans and computers to discover and understand the capabilities of the service without access to source code.
+
+Bedrock agent will be able to understand what tool to use based on the user request, the agent then will call the correct endpoint due to the OpenAPI spec.
+
+1. Go to [S3 console](https://s3.console.aws.amazon.com/s3/get-started?region=us-east-1&bucketType=general) and click on the `Create bucket` button
+2. Make sure that `US East (N. Virginia)` or `US West (Oregon)` is selected as region (select the same where your DynamoDB and Lambda reside). 
+3. Give your bucket a unique name, for example `bucket-for-agent-NUMBERS`. Click `Create bucket`.
+![Create bucket](images/create-bucket.jpg)
+4. Select your created bucket, click on the `Upload` button.
+5. You can drag and drop `openapi-schema.json` file and then click on the `Upload` button
 
 ### :four: Step 4: Configure Bedrock agent
 
