@@ -8,7 +8,7 @@ BOT_ID = os.environ['BOT_ID']
 
 def summarize_messages(parameters: list) -> str:
     """
-    Summarizes messages extracted from a chat and extracts action points.
+    Summarizes messages extracted from a chat.
 
     Args:
         parameters (list): A list of dictionaries containing parameters
@@ -20,8 +20,7 @@ def summarize_messages(parameters: list) -> str:
         str: A summary of the chat and extracted action points.
     """
     messages = next(item["value"] for item in parameters if item["name"] == "messages")
-    instructions = "Given messages extracted from the chat, " \
-                   "summarize the chat and extract my action points.\n"
+    instructions = "Given the messages extracted from the chat, summarize.\n"
     return ask_model(messages, instructions)
 
 

@@ -1,0 +1,23 @@
+{
+  "agent": {
+    "alias": "LKIURTEDID",
+    "name": "Agent-AWS",
+    "version": "DRAFT",
+    "id": "RTJIKOYUZZ"
+  },
+  "sessionId": "786745324323626",
+  "httpMethod": "GET",
+  "sessionAttributes": {},
+  "inputText": "Pull messages",
+  "promptSessionAttributes": {},
+  "apiPath": "/pull-messages",
+  "messageVersion": "1.0",
+  "actionGroup": "agent_action_group",
+  "parameters": [
+    {
+      "name": "chatName",
+      "type": "string",
+      "value": "Data Science chat"
+    }
+  ]
+}

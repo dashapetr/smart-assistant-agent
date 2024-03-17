@@ -25,6 +25,7 @@ Agents extend FMs to understand user requests, break down complex tasks into mul
 
 - AWS News Blog: [Enable Foundation Models to Complete Tasks With Agents for Amazon Bedrock](https://aws.amazon.com/blogs/aws/preview-enable-foundation-models-to-complete-tasks-with-agents-for-amazon-bedrock/)
 - AWS News Blog: [Agents for Amazon Bedrock is now available with improved control of orchestration and visibility into reasoning](https://aws.amazon.com/blogs/aws/agents-for-amazon-bedrock-is-now-available-with-improved-control-of-orchestration-and-visibility-into-reasoning/)
+- [How Agents for Amazon Bedrock works](https://docs.aws.amazon.com/bedrock/latest/userguide/agents-how.html)
 
 ## Let's build!
 
@@ -37,26 +38,38 @@ Add your bot to chat(s) from where you want to receive updates.
 
 ### :one: Step 1: Create DynamoDB table
 
+We will create a DynamoDB table with Telegram chats that our bot can reach. The main purpose of the table is to align chat names with their ids. The Bedrock agent can refer the chat by name (even without exact match), and Lambda function can find in DynamoDB a corresponding chat id and filter messages updates by this chat id.
 
+As per March 2024, [Bedrock agents are available in the following regions:](https://docs.aws.amazon.com/bedrock/latest/userguide/agents-supported.html)
+- US East (N. Virginia)
+- US West (Oregon)
 
+That's why it will be a good idea to create DynamoDB table and Lambda Function in the same region where we are planning to create an agent (to decrease cross-region latency and avoid potential cross-region data transfer costs).
+
+1. Navigate to the [DynamoDB console](https://us-east-1.console.aws.amazon.com/dynamodbv2/home?region=us-east-1#service) and click on `Create table`.
+2. Enter `bedrock_agent_chats` as `Table name` and `bot_id` as `Partition key`. Click on the `Create table` button.
+![DynamoDB create table](images/dynamodb-create-table.jpg)
+3. Once the table is created, let's populate it with values. Click on the created table, then click on the `Actions` button and select `Create item` from the drop-down list.
+4. Paste `100200300` as `bot_id` (or another Id value, but make sure to use the same bot Id in Lambda function environment variables later on)
+5. Click on the `Add new attribute` button and select `List`. Paste `chats` as Attribute name
+6. Click on the first `Insert a field` button and choose `Map`
+7. Click on the lowest `Insert a field` button and choose `String`. Paste `chat_id` as Attribute name and your Telegram chat id (typically starting from '-') as value. [How to get telegram chat id](https://medium.com/@2mau/how-to-get-a-chat-id-in-telegram-1861a33ca1de).
+8. Click on the lowest `Insert a field` button and choose `String`. Paste `chat_name` as Attribute name and your Telegram chat name as value.
+9. Repeat steps 6-8 to add more chats, once ready, click on the `Create item` button.
+![Add item](images/dynamodb-add-item.jpg)
 
 ### :two: Step 2: Create Lambda Function
 
 Lambda Function will manage all the logic required for the agent actions.
 Code contains set of APIs that Bedrock agent will call. The function will then format the response and send it back to the agent.
 
-As per March 2024, [Bedrock agents are available in the following regions:](https://docs.aws.amazon.com/bedrock/latest/userguide/agents-supported.html)
-- US East (N. Virginia)
-- US West (Oregon)
-
-That's why it will be a good idea to create Lambda Function in the same region where we are planning to create an agent (to decrease cross-region latency and avoid potential cross-region data transfer costs).
 
 #### Create Lambda:
 
 1. Navigate to the [Lambda Console](https://us-east-1.console.aws.amazon.com/lambda/home?region=us-east-1#/functions) and click on `Create function` button. 
 Make sure that `US East (N. Virginia)` or `US West (Oregon)` is selected as region.
 2. Paste `ChatSummarizer` as a function name and choose `Python 3.12` as a runtime
-3. Click on Create function button in the bottom of the page
+3. Click on `Create function` button in the bottom of the page
 
 ![Create Lambda Function](/images/create_lambda.jpg)
 
@@ -88,7 +101,7 @@ Make sure that `US East (N. Virginia)` or `US West (Oregon)` is selected as regi
 1. Once permissions are updated, go back to the `ChatSummarizer` lambda, click on the `Configuration` Tab in the same page and Choose `Environment variables` from the left side panel 
 2. Click `Edit` button to add environment variables
 3. By clicking `Add environment variable` button add the following key value pairs:
-- `BOT_ID`: `100200300` (you can change it to any unique value, make sure you use the same Id for your bot in DynamoDB table)
+- `BOT_ID`: `100200300` (you can change it to any unique value, make sure you use the same Id for your bot_id partition key in DynamoDB table)
 - `BOT_TOKEN`: insert your Telegram bot token obtained in Step 0
 - `DEFAULT_CHAT_ID`: value should start from `-`, paste the Telegram chat id you want to use as default 
 - `DYNAMODB_TABLE_NAME`: `bedrock_agent_chats`
@@ -135,16 +148,23 @@ zip my_deployment_package.zip tools.py
 ```
 6. Now you can go back to the Lambda function, click on the `Code` tab in the same page 
 7. Click on the `Upload from` button and select `.zip file` in the dropdown list
-8. Select `my_deployment_package.zip` and upload it
+8. Select `my_deployment_package.zip` and upload it, click on the `Save` button
 9. Your code should appear inside the `Code source` window
 
 ![Lambda code](images/lambda-code.jpg)
-https://docs.aws.amazon.com/lambda/latest/dg/python-package.html#python-package-create-dependencies
+Zip deployment package creation steps are described with additional details in the [documentation](https://docs.aws.amazon.com/lambda/latest/dg/python-package.html#python-package-create-dependencies). 
 
 #### Test your Lambda:
 
-Based on the Bedrock documentation, here is how request payload looks like.
-Create test events to test your Lambda
+Since our Lambda contains a set of APIs, you may want to create several test events to test each API.
+
+1. Click on the `Test` tab near the top of the page.
+2. Fill in `Event name`: `summarize` 
+3. Paste the code from `test-payload-lambda/summarize.json` in `Even JSON` window. 
+This will be a test event for the `summarize` API that matches how the Agent will send a request.
+4. Click on `Save` and then `Test` to execute the Lambda function. You should see the results of the function invocation, which will be a summarization response from the Titan Model.
+![Lambda test results](images/lambda-test-result.jpg)
+5. Click on `Create new event` button and repeat steps 2-4 to add more test events (you can find JSON payloads in the `test-payload-lambda` folder) 
 
 ### :three: Step 3: Add openapi file to S3
 

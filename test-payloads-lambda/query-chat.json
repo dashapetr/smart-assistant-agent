@@ -1,0 +1,35 @@
+{
+  "agent": {
+    "alias": "LKIURTEDID",
+    "name": "Agent-AWS",
+    "version": "DRAFT",
+    "id": "RTJIKOYUZZ"
+  },
+  "sessionId": "786745324323626",
+  "httpMethod": "POST",
+  "sessionAttributes": {},
+  "inputText": "Query chat",
+  "promptSessionAttributes": {},
+  "apiPath": "/query-chat",
+  "messageVersion": "1.0",
+  "actionGroup": "agent_action_group",
+  "requestBody": {
+    "content": {
+      "application/json": {
+        "properties": [
+          {
+            "name": "messages",
+            "type": "string",
+            "value": "Amelia: We have a new NLP hackathon, who is interested?, Emil: What is the deadline?, Amelia: April 4th, Emil: Let's form a team, who's with us?"
+          },
+          {
+            "name": "customPrompt",
+            "type": "string",
+            "value": "When is the hackathon deadline?"
+          }
+        ]
+      }
+    }
+  },
+  "parameters": []
+}

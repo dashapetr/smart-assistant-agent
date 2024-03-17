@@ -42,7 +42,7 @@ def ask_model(messages: str, instructions: str) -> str:
     if not messages:
         return "No messages was found. Consider using other chat."
 
-    prompt = instructions + str(messages)
+    prompt = str(messages) + instructions
 
     prompt_config = {
         "inputText": prompt,
@@ -96,7 +96,7 @@ def get_chat_id(bot_id: str, chat_name: str,
     response = dynamodb.get_item(
         TableName=table_name,
         Key={
-            'agent_id': {'S': bot_id}
+            'bot_id': {'S': bot_id}
             }
     )
 

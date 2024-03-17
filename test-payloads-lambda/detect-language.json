@@ -1,0 +1,30 @@
+{
+  "agent": {
+    "alias": "LKIURTEDID",
+    "name": "Agent-AWS",
+    "version": "DRAFT",
+    "id": "RTJIKOYUZZ"
+  },
+  "sessionId": "786745324323626",
+  "httpMethod": "POST",
+  "sessionAttributes": {},
+  "inputText": "Detect language",
+  "promptSessionAttributes": {},
+  "apiPath": "/detect-language",
+  "messageVersion": "1.0",
+  "actionGroup": "agent_action_group",
+  "requestBody": {
+    "content": {
+      "application/json": {
+        "properties": [
+          {
+            "name": "messages",
+            "type": "string",
+            "value": "Amelia: Cześć, gdzie i kiedy odbędzie się nasze spotkanie? Emil: Poniedziałek, godzina 18:00 w sali konferencyjnej"
+          }
+        ]
+      }
+    }
+  },
+  "parameters": []
+}
