@@ -186,7 +186,7 @@
       "post": {
         "summary": "Query the chat",
         "description": "Query the chat based on a custom prompt question. The API takes in text of messages written in English, and the custom prompt (question). It provides an answer based on the chat context.",
-        "operationId": "summarizeMessages",
+        "operationId": "queryChat",
         "requestBody": {
           "required": true,
           "content": {

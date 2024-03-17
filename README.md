@@ -7,15 +7,33 @@ Welcome to building GenAI Telegram Chat assistant using Amazon Bedrock Agents.
 
 ## What Chat Assistant Can Do
 
-Demo gif here
+![Agent demo](images/agent-demo.gif)
 
-### 1- Get latest chat updates:
+### 1 - Get latest chat updates:
+
+:iphone: You can ask agent to pull message updates from a specific Telegram chat.
+
+The chat name doesn't have to be an exact match, because orchestration Lambda function will handle name-to-id conversion.
+
+![Pull messages example](images/agent-pull-messages.jpg)
 
 ### 2 - Translate messages:
 
-### 3 - Summarize messages and extract action points:
+:arrows_clockwise: If chat is in a language other than English, you can ask to translate it to English
+
+![Translate messages](images/translate-messages.jpg)
+
+### 3 - Summarize messages:
+
+:bookmark_tabs: You can ask for a summary of messages from a specific chat.
+
+![Summarize messages example](images/summarize-messages-example.jpg)
 
 ### 4 - Query chats based on a custom prompt:
+
+:mag: You can query a specific chat by asking any questions.
+
+![Answer questions](images/answer-questions.jpg)
 
 ## What is Bedrock Agent?
 
@@ -181,13 +199,32 @@ Bedrock agent will be able to understand what tool to use based on the user requ
 
 ### :four: Step 4: Configure Bedrock agent
 
-Now as all the preparation is done, we can proceed with Agent creation.
-Go to Bedrock and create agent. Mind the region!
-Make sure that claude model is enabled
+Now as all the preparation is done, we can proceed with Bedrock agent creation.
+**Prerequisites**: we will use `Anthropic Claude V2.1` as model, make sure that you [have access to it in your account](https://docs.aws.amazon.com/bedrock/latest/userguide/model-access.html).
+
+1. Go to [Bedrock console](https://us-east-1.console.aws.amazon.com/bedrock/home?region=us-east-1#/overview), select `Agents` in the left navigation panel, then click on the `Create Agent` button
+2. Provide `smart-assistant-agent` as Agent name; Select `No` for User input, click on the `Next` button.
+3. We will use `Anthropic Claude V2.1` as model; Paste the following text as Instructions for the Agent and click on the `Next` button.
+```markdown
+You are a smart assistant designed to pull out the messages from a specific Telegram chat. 
+You will translate pulled messages into English if they are not in English. 
+If you are asked to summarize messages, summarize messages. 
+If you are asked a specific question, query the chat messages based on the provided prompt.
+```
+4. Next, we will add Action group. Use `ChatReadingSummarizingActionGroup` as Action group name, select `ChatSummarizer` as Lambda function. Finally, browse S3 and select the `openapi-schema.json` file. Click `Next`.
+![Add action group](images/agent-add-action-group.jpg)
+5. Skip adding knowledge base and click on the `Create agent` button.
 
 ### :five: Step 5: Test it out!
 
-Note: Keep in mind that 24 hours window
+Once the agent is created, feel free to test it! Ask questions and observe results.
+Additionally, you can evaluate the chained process of agents reasoning by looking at **Trace** for your request.
+It contains reasoning steps for **Pre-Processing trace**, **Orchestration and Knowledge Base**, and **Post-Processing trace**
+
+![Agent reasoning process](images/agent-reasoning.jpg)
+
+:warning: Note: Keep in mind that Telegram API pulls updates for the recent 24 hours. 
+If you want to be able to browse chats history, please refer to the [official documentation](https://core.telegram.org/bots/).
 
 ## Conclusion and more ideas: 
 
