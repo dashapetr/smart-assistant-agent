@@ -104,6 +104,7 @@ Make sure that `US East (N. Virginia)` or `US West (Oregon)` is selected as regi
 3. Provide Statement Id as `agent`, Principal as `bedrock.amazonaws.com` and Action as `lambda:InvokeFunction`. Click Save after adding all the above three information.
 
 ![Lambda add permissions](/images/lambda_add_permissions.jpg)
+
 4. Add the following Policy Statement to your Execution role, so Lambda can call Bedrock. (You can find details [here](https://docs.aws.amazon.com/IAM/latest/UserGuide/access_policies_manage-attach-detach.html#add-policies-console))
 ```{
     "Version": "2012-10-17",
