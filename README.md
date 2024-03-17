@@ -27,11 +27,15 @@ The chat name doesn't have to be an exact match, because orchestration Lambda fu
 
 :bookmark_tabs: You can ask for a summary of messages from a specific chat.
 
+If your chat is in a language other than English, the language will be detected and the chat will be translated to English before summarization.
+
 ![Summarize messages example](images/summarize-messages-example.jpg)
 
 ### 4 - Query chats based on a custom prompt:
 
 :mag: You can query a specific chat by asking any questions.
+
+If your chat is in a language other than English, the language will be detected and the chat will be translated to English before querying.
 
 ![Answer questions](images/answer-questions.jpg)
 
