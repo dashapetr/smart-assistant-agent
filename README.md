@@ -62,9 +62,13 @@ Add your bot to chat(s) from where you want to receive updates.
 
 We will create a DynamoDB table with Telegram chats that our bot can reach. The main purpose of the table is to align chat names with their ids. The Bedrock agent can refer the chat by name (even without exact match), and Lambda function can find in DynamoDB a corresponding chat id and filter messages updates by this chat id.
 
-As per March 2024, [Bedrock agents are available in the following regions:](https://docs.aws.amazon.com/bedrock/latest/userguide/agents-supported.html)
+As per May 2024, [Bedrock agents are available in the following regions:](https://docs.aws.amazon.com/bedrock/latest/userguide/agents-supported.html)
 - US East (N. Virginia)
 - US West (Oregon)
+- Asia Pacific (Singapore)
+- Asia Pacific (Sydney)
+- Asia Pacific (Tokyo)
+- Europe (Frankfurt)
 
 That's why it will be a good idea to create DynamoDB table and Lambda Function in the same region where we are planning to create an agent (to decrease cross-region latency and avoid potential cross-region data transfer costs).
 
