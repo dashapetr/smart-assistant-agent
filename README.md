@@ -256,3 +256,4 @@ If you enjoyed agents, you might also like:
 - [Shopify Customer Care powered by GenAI](https://community.aws/content/2dJUQiedCwDfOzNrbW8z9awWgxy/introducing-amazon-bedrock-agents-to-take-your-shopify-management-to-the-next-level-with-generative-ai) by Ricardo Ceci
 - [Build a retail agent](https://github.com/aws-samples/agentsforbedrock-retailagent) by Manju Prasad and Amit Arora
 - [Webscrape and internet search agent](https://github.com/build-on-aws/bedrock-agents-webscraper) by Justin Ossai
+- [Automate the insurance claim lifecycle using Agents and Knowledge Bases for Amazon Bedrock](https://aws.amazon.com/blogs/machine-learning/automate-the-insurance-claim-lifecycle-using-agents-and-knowledge-bases-for-amazon-bedrock/) by Kyle Blocksom
