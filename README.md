@@ -216,26 +216,29 @@ Bedrock agent will be able to understand what tool to use based on the user requ
 ### :four: Step 4: Configure Bedrock agent
 
 Now as all the preparation is done, we can proceed with Bedrock agent creation.
-**Prerequisites**: we will use `Anthropic Claude V2.1` as model, make sure that you [have access to it in your account](https://docs.aws.amazon.com/bedrock/latest/userguide/model-access.html).
+**Prerequisites**: we will use `Anthropic Claude 3 Haiku v1` as model, make sure that you [have access to it in your account](https://docs.aws.amazon.com/bedrock/latest/userguide/model-access.html).
+**Note**: the new [simplified experience to create and manage Agents](https://aws.amazon.com/blogs/aws/agents-for-amazon-bedrock-introducing-a-simplified-creation-and-configuration-experience/) in the US East (N. Virginia) and US West (Oregon) AWS Regions has been introduced recently. The steps below reflect this simplified version.
 
 1. Go to [Bedrock console](https://us-east-1.console.aws.amazon.com/bedrock/home?region=us-east-1#/overview), select `Agents` in the left navigation panel, then click on the `Create Agent` button
-2. Provide `smart-assistant-agent` as Agent name; Select `No` for User input, click on the `Next` button.
-3. We will use `Anthropic Claude V2.1` as model; Paste the following text as Instructions for the Agent and click on the `Next` button.
+2. Provide `smart-assistant-agent` as Agent name, provide a description (optional). Click on the `Create` button.
+3. You are now presented with the Agent builder, the place where you can access and edit the overall configuration of an agent. 
+We will select `Anthropic Claude 3 Haiku v1` as model ([Pricing](https://aws.amazon.com/bedrock/pricing/)); Paste the following text as Instructions for the Agent:
 ```markdown
 You are a smart assistant designed to pull out the messages from a specific Telegram chat. 
 You will translate pulled messages into English if they are not in English. 
 If you are asked to summarize messages, summarize messages. 
 If you are asked a specific question, query the chat messages based on the provided prompt.
 ```
-4. Next, we will add Action group. Use `ChatReadingSummarizingActionGroup` as Action group name, select `ChatSummarizer` as Lambda function. Finally, browse S3 and select the `openapi-schema.json` file. Click `Next`.
+Leave all the rest as default. Then, choose `Save` to update the configuration of the agent.
+4. Next, we will add Action group: choose `Add` in the Action groups section. Use `chat-reading-summarizing-action-group` as Action group name.
+In the Action group type section, select `Define with API schemas`. In the Action group invocation section, select `Select an existing Lambda function` and select `ChatSummarizer` as Lambda function. 
+In the Action group schema section, select `Select an existing API schema`, browse S3 and select the `openapi-schema.json` file. Click on `Save and exit`.
 
 ![Add action group](images/agent-add-action-group.jpg)
 
-5. Skip adding knowledge base and click on the `Create agent` button.
-
 ### :five: Step 5: Test it out!
 
-Once the agent is created, feel free to test it! Ask questions and observe results.
+Once the agent is created, feel free to test it! Look for the `Test Agent` section, choose `Prepare` to prepare the agent. Ask questions and observe results.
 
 Additionally, you can evaluate the chained process of agents reasoning by looking at **Trace** for your request.
 It contains reasoning steps for **Pre-Processing trace**, **Orchestration and Knowledge Base**, and **Post-Processing trace**
