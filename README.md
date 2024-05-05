@@ -230,6 +230,7 @@ If you are asked to summarize messages, summarize messages.
 If you are asked a specific question, query the chat messages based on the provided prompt.
 ```
 Leave all the rest as default. Then, choose `Save` to update the configuration of the agent.
+
 4. Next, we will add Action group: choose `Add` in the Action groups section. Use `chat-reading-summarizing-action-group` as Action group name.
 In the Action group type section, select `Define with API schemas`. In the Action group invocation section, select `Select an existing Lambda function` and select `ChatSummarizer` as Lambda function. 
 In the Action group schema section, select `Select an existing API schema`, browse S3 and select the `openapi-schema.json` file. Click on `Save and exit`.
